@@ -1,0 +1,9 @@
+export( protModsTable,
+	scoreTable,
+	mtzTable,
+	protAnnotations,
+	pepModsTable,
+	protIDsplitter,
+	updateSeq,
+	aucTable
+	)
