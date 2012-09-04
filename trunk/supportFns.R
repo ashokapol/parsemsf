@@ -48,17 +48,18 @@ protIDsplitter <- function(cur.str) {
 updateSeq <- function(x)
 {
     #PeptideID, Sequence, Position, ModificationName, TerminalModificationName, ConfidenceLevel
-    SeqOrg <- as.character(x[2])
+    cols <- names(x)
+    SeqOrg <- as.character(x[which(cols=='Sequence')])
     Seq <- SeqOrg
 
-    posn <- as.numeric(unlist(strsplit(as.character(x[3]),",")))
+    posn <- as.numeric(unlist(strsplit(as.character(x[which(cols=='Position')]),",")))
     idx <- order(posn)
 
-    modn <- unlist(strsplit(as.character(x[4]),","))
-    tmod <- as.character(x[6])
+    modn <- unlist(strsplit(as.character(x[which(cols=='ModificationName')]),","))
+    tmod <- as.character(x[which(cols=='TerminalModificationName')])
 
     confLs <- c("Low","Medium","High")
-    confL <- confLs[as.numeric(x[5])]
+    confL <- confLs[as.numeric(x[which(cols=='ConfidenceLevel')])]
 
     posn <- posn[idx]
     modn <- modn[idx]
@@ -84,6 +85,27 @@ updateSeq <- function(x)
             substr(Seq,N,N) <- tolower(aa)
         }
     }
-    return(c(PeptideID=as.numeric(x[1]), Sequence=SeqOrg, ModSequence=Seq,
-        Modifications=paste(mod, collapse=";"), Confidence=confL))
+    return(c(PeptideID=as.numeric(x[which(cols=='PeptideID')]), Sequence=SeqOrg, ModSequence=Seq,
+        Modifications=paste(mod, collapse=";"), Confidence=confL, 
+        SearchNode=as.numeric(x[which(cols=='SearchNode')])))
 }
+
+checkPara <- function(msfFile, paraValue)
+{
+    require(RSQLite)
+    require(sqldf)
+    driver = dbDriver("SQLite")
+    con <- dbConnect(driver, dbname=msfFile)
+  
+    sql_command <- paste("SELECT pnp.ParameterName, pnp.ValueDisplayString, 
+                          pn.FriendlyName
+                          FROM ProcessingNodeParameters pnp, ProcessingNodes pn
+                          WHERE pn.ProcessingNodeNumber = pnp.ProcessingNodeNumber;")
+    rs_sql <- dbSendQuery(con, sql_command)
+    paraTab <- fetch(rs_sql, n=-1)
+    dbClearResult(rs_sql);
+    return(sum(grepl(paraValue, paraTab$ValueDisplayString)) > 1)
+}
+
+
+
