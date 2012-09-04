@@ -24,7 +24,7 @@ pepModsTable <- function(msfFile, minConf="High")
               3)
 
     # Regular Mods
-    sql_regMods <- paste("SELECT paam.PeptideID, p.Sequence,",
+    sql_regMods <- paste("SELECT paam.PeptideID, p.Sequence, p.ProcessingNodeNumber AS SearchNode,",
                     "group_concat(paam.Position) AS Position,",
                     "group_concat(aam.ModificationName) AS ModificationName,",
                     "p.ConfidenceLevel",
@@ -63,4 +63,4 @@ pepModsTable <- function(msfFile, minConf="High")
 
 # Run
 #M <- pepModsTable(msfFile="D:/Research/R/msfRead/test_dimethyl.msf", minConf="High")
-
+#M <- pepModsTable(msfFile="D:/Research/R/paRseMSF/SYR_PIR355A15PA1_12AUG06_H1215 Lavage_H1220 Lavage Run 1.msf", minConf="High")
